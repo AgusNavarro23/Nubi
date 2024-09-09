@@ -1,0 +1,19 @@
+.Btn-ODF{
+    background-color:#E58A92;
+}
+.Btn-ODF:hover{
+    background-color: white;
+    color: #E58A92;
+    border: 1px solid #E58A92;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80vw; /* Asegúrate de que el contenedor ocupe toda la anchura de la página */
+    border: none;
+}
+.card-body{
+    border: 2px solid #E58A92;
+}

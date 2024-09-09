@@ -1,0 +1,14 @@
+.App {
+    display: flex;
+  }
+  
+  .slidebar {
+    width: 250px; /* Ancho de la sidebar */
+  }
+  
+  .content {
+    flex: 1; /* El contenido ocupará el espacio restante */
+    display:'flex';
+    justify-content: 'center';
+    align-items: 'center';
+  }
