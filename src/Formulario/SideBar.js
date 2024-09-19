@@ -54,13 +54,13 @@ const SideBar =()=>{
             <Link className="nav-link" to="/ListaDistribucion">Distribuciones</Link>
         </li>
         <li className="nav-item">
-            <Link className="nav-link" to="/CrearNap">NAPS</Link>
+            <Link className="nav-link" to="/ListaNap">NAPS</Link>
         </li>
         <li className="nav-item">
-            <Link className="nav-link" to="/CrearServicio">Servicio</Link>
+            <Link className="nav-link" to="/ListaServicio">Servicio</Link>
         </li>
         <li className="nav-item">
-            <Link className="nav-link" to="/CrearCliente">Clientes</Link>
+            <Link className="nav-link" to="/ListaCliente">Clientes</Link>
         </li>
       </ul>
     </div> 

@@ -29,6 +29,11 @@ import ListaSpliter from "./Formulario/Spliter/ListaSpliter.js";
 import EditarSpliter from "./Formulario/Spliter/EditarSpliter.js";
 import EditarDistribucion from "./Formulario/Distribuciones/EditarDistribucion.js";
 import ListaDistribucion from "./Formulario/Distribuciones/ListaDistribucion.js";
+import ListaNap from "./Formulario/NAPs/ListaNap.js";
+import EditarNap from "./Formulario/NAPs/EditarNap.js";
+import ListaServicio from "./Formulario/Servicio/ListaServicio.js";
+import EditarServicio from "./Formulario/Servicio/EditarServicio.js";
+import ListaCliente from "./Formulario/Clientes/ListaCliente.js";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -64,8 +69,13 @@ function App() {
             <Route path="/ListaDistribucion" element={isAuthenticated ? <ListaDistribucion/> : <Navigate to="/" />} />
             <Route path="/CrearDistribucion" element={isAuthenticated ? <CrearDistribucion/> : <Navigate to="/" />} />
             <Route path="/EditarDistribucion/:id" element={isAuthenticated ? <EditarDistribucion/> : <Navigate to="/" />} />
+            <Route path="/ListaNap" element={isAuthenticated ? <ListaNap/> : <Navigate to="/" />} />
             <Route path="/CrearNap" element={isAuthenticated ? <CrearNap/> : <Navigate to="/" />} />
+            <Route path="/EditarNap/:id" element={isAuthenticated ? <EditarNap/> : <Navigate to="/" />} />
+            <Route path="/ListaServicio" element={isAuthenticated ? <ListaServicio/> : <Navigate to="/" />} />
             <Route path="/CrearServicio" element={isAuthenticated ? <CrearServicio/> : <Navigate to="/" />} />
+            <Route path="/EditarServicio/:id" element={isAuthenticated ? <EditarServicio/> : <Navigate to="/" />} />
+            <Route path="/ListaCliente" element={isAuthenticated ? <ListaCliente/> : <Navigate to="/" />} />
             <Route path="/CrearCliente" element={isAuthenticated ? <CrearCliente/> : <Navigate to="/" />} />
 
 

@@ -18,7 +18,7 @@ const ListaDistribucion = () => {
     const [DsSel,setDsSel] = useState("");
 
     useEffect(() => {
-        axios.get('http://localhost:5242/api/MantenimientosControlador/Distribuciones')
+        axios.get('https://localhost:7097/api/ControladorDatos/Distribuciones')
             .then(response => {
                 const data = response.data;
                 setDistribuciones(data);
@@ -86,19 +86,19 @@ const ListaDistribucion = () => {
                     <table id="example" className="table" style={{ width: '100%' }}>
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Descripcion</th>
-                                <th>Botella</th>
-                                <th>Sector</th>
+                                <th>Spliter</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedTr.length > 0 ? (
                                 paginatedTr.map(distribucion => (
-                                    <tr key={distribucion.descripcion}>
+                                    <tr key={distribucion.idDistribucionSector}>
+                                        <td>{distribucion.idDistribucionSector}</td>
                                         <td>{distribucion.descripcion}</td>
-                                        <td>{distribucion.botella}</td>
-                                        <td>{distribucion.sector}</td>
+                                        <td>{distribucion.spliter}</td>
                                         <td style={{ padding: '10px' }}>
                                             <Link to={`/EditarDistribucion/${distribucion.descripcion}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
                                             <i onClick={BorrarClick} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
@@ -114,9 +114,9 @@ const ListaDistribucion = () => {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th>Descripcion</th>
-                                <th>Botella</th>
-                                <th>Sector</th>
+                                <th>ID</th>
+                                <th>Descripción</th>
+                                <th>Spliter</th>
                             </tr>
                         </tfoot>
                     </table>

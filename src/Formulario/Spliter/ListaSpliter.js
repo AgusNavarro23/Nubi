@@ -18,7 +18,7 @@ const ListaSpliter = () => {
     const [SpSel,setSpSel] = useState("");
 
     useEffect(() => {
-        axios.get('http://localhost:5242/api/MantenimientosControlador/Spliters')
+        axios.get('https://localhost:7097/api/ControladorDatos/Spliters')
             .then(response => {
                 const data = response.data;
                 setSpliters(data);
@@ -89,6 +89,7 @@ const ListaSpliter = () => {
                                 <th>Id</th>
                                 <th>Sector</th>
                                 <th>Casette</th>
+                                <th>Botella</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
@@ -99,6 +100,7 @@ const ListaSpliter = () => {
                                         <td>{spliter.idSpliter}</td>
                                         <td>{spliter.sector}</td>
                                         <td>{spliter.casette}</td>
+                                        <td>{spliter.botella}</td>
                                         <td style={{ padding: '10px' }}>
                                             <Link to={`/EditarSpliter/${spliter.idSpliter}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
                                             <i onClick={BorrarClick} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
@@ -117,6 +119,7 @@ const ListaSpliter = () => {
                                 <th>Id</th>
                                 <th>Sector</th>
                                 <th>Casette</th>
+                                <th>Botella</th>
                             </tr>
                         </tfoot>
                     </table>

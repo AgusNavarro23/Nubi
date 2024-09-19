@@ -16,9 +16,10 @@ const ListaBotella = () => {
     const [ShowModal, setShowModal] = useState(false);
     const [ShowDetalle, setShowDetalle] = useState(false);
     const [BotSel,setBotSel] = useState("");
+    const [BotBorrar,setBotBorrar]=useState("");
 
     useEffect(() => {
-        axios.get('http://localhost:5242/api/MantenimientosControlador/Botellas')
+        axios.get('https://localhost:7097/api/ControladorDatos/Botellas')
             .then(response => {
                 const data = response.data;
                 setBotellas(data);
@@ -51,12 +52,22 @@ const ListaBotella = () => {
         navigate("/CrearBotella");
     }
 
-    const BorrarClick = () => {
+    const BorrarClick = (ID) => {
         setShowModal(true);
+        setBotBorrar(ID)
     }
 
     const BorrarSeleccionado = () => {
-        // Implementa la lógica para borrar el elemento seleccionado
+        if (BotBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarBotella/${BotBorrar}`)
+        .then(response=>{
+            setBotellas(Botellas.filter(botella => botella.idBotella !== BotBorrar));
+            setShowModal(false);
+        })
+        .catch(error=>{
+            console.error("Hubo un Error al eliminar la Botella",error)
+            setShowModal(false)
+        })
     }
 
     const VerClick = (ID) => {
@@ -88,6 +99,10 @@ const ListaBotella = () => {
                             <tr>
                                 <th>Id</th>
                                 <th>Descripcion</th>
+                                <th>Ubicación</th>
+                                <th>Tipo</th>
+                                <th>DistanciaOptica</th>
+                                <th>DistanciaLineal</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
@@ -97,9 +112,13 @@ const ListaBotella = () => {
                                     <tr key={botella.idBotella}>
                                         <td>{botella.idBotella}</td>
                                         <td>{botella.descripcion}</td>
+                                        <td>{botella.ubicacion}</td>
+                                        <td>{botella.tipo}</td>
+                                        <td>{botella.distanciaOptica}</td>
+                                        <td>{botella.distanciaLineal}</td>
                                         <td style={{ padding: '10px' }}>
                                             <Link to={`/EditarBotella/${botella.idBotella}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
-                                            <i onClick={BorrarClick} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={()=>BorrarClick(botella.idBotella)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
                                             <i onClick={() => VerClick(botella.idBotella)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
@@ -171,6 +190,42 @@ const ListaBotella = () => {
                                     type="text"
                                     className="form-control"
                                     value={BotSel.descripcion || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Ubicación</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={BotSel.ubicacion || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Tipo de Botella</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={BotSel.tipo || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">DistanciaOptica</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={BotSel.distanciaOptica || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">DistanciaLineal</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={BotSel.distanciaLineal || ''}
                                     readOnly
                                 />
                             </div>

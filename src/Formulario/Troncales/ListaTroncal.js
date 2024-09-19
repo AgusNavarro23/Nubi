@@ -16,9 +16,11 @@ const ListaTroncal = () => {
     const [ShowModal, setShowModal] = useState(false);
     const [ShowDetalle, setShowDetalle] = useState(false);
     const [TronSel,setTronSel] = useState("");
+    const [TrBorrar,setTrBorrar]=useState("");
+
 
     useEffect(() => {
-        axios.get('http://localhost:5242/api/MantenimientosControlador/Troncales')
+        axios.get('https://localhost:7097/api/ControladorDatos/Troncales')
             .then(response => {
                 const data = response.data;
                 setTroncales(data);
@@ -51,13 +53,22 @@ const ListaTroncal = () => {
         navigate("/CrearTroncal");
     }
 
-    const BorrarClick = () => {
+    const BorrarClick = (ID) => {
+        setTrBorrar(ID)
         setShowModal(true);
     }
 
     const BorrarSeleccionado = () => {
-        // Implementa la lógica para borrar el elemento seleccionado
-    }
+        if (TrBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarTroncal/${TrBorrar}`)
+        .then(response=>{
+            setTroncales(Troncales.filter(troncal => troncal.idTroncal !== TrBorrar));
+            setShowModal(false);
+        })
+        .catch(error=>{
+            console.error("Hubo un Error al eliminar el Troncal",error)
+            setShowModal(false)
+        })    }
 
     const VerClick = (ID) => {
         const troncalseleccionado = Troncales.find(troncal => troncal.idTroncal === ID);
@@ -89,6 +100,8 @@ const ListaTroncal = () => {
                                 <th>Id</th>
                                 <th>Nombre</th>
                                 <th>TipoFibra</th>
+                                <th>LongitudLineal</th>
+                                <th>LongitudOptica</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
@@ -97,11 +110,13 @@ const ListaTroncal = () => {
                                 paginatedTr.map(troncal => (
                                     <tr key={troncal.idTroncal}>
                                         <td>{troncal.idTroncal}</td>
-                                        <td>{troncal.nombre}</td>
-                                        <td>{troncal.tipoFibra}</td>
+                                        <td>{troncal.tr_Nombre}</td>
+                                        <td>{troncal.tr_TipoFibra}</td>
+                                        <td>{troncal.tr_LongitudLineal}</td>
+                                        <td>{troncal.tr_LongitudOptica}</td>
                                         <td style={{ padding: '10px' }}>
                                             <Link to={`/EditarTroncal/${troncal.idTroncal}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
-                                            <i onClick={BorrarClick} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={()=>BorrarClick(troncal.idTroncal)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
                                             <i onClick={() => VerClick(troncal.idTroncal)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
@@ -117,6 +132,8 @@ const ListaTroncal = () => {
                                 <th>Id</th>
                                 <th>Nombre</th>
                                 <th>TipoFibra</th>
+                                <th>LongitudLineal</th>
+                                <th>LongitudOptica</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -173,7 +190,7 @@ const ListaTroncal = () => {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={TronSel.nombre || ''}
+                                    value={TronSel.tr_Nombre || ''}
                                     readOnly
                                 />
                             </div>
@@ -182,7 +199,25 @@ const ListaTroncal = () => {
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={TronSel.tipoFibra || ''}
+                                    value={TronSel.tr_TipoFibra || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Longitud Lineal</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={TronSel.tr_LongitudLineal || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Longitud Óptica</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={TronSel.tr_LongitudOptica || ''}
                                     readOnly
                                 />
                             </div>

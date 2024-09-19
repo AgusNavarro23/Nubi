@@ -5,26 +5,26 @@ import { useNavigate } from 'react-router-dom';
 import { Modal, Button, Pagination } from 'react-bootstrap';
 import * as XLSX from 'xlsx';  // Importa la biblioteca XLSX
 
-const ListaPelo = () => {
-    const [Pelos, setPelos] = useState([]);
+const ListaNap = () => {
+    const [Naps, setNaps] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8); // Número de items por página
     const [totalPages, setTotalPages] = useState(1);
-    const [paginatedPelos, setPaginatedPelos] = useState([]);
+    const [paginatedTr, setpaginatedTr] = useState([]);
     const navigate = useNavigate();
     const [ShowModal, setShowModal] = useState(false);
     const [ShowDetalle, setShowDetalle] = useState(false);
-    const [PeloSel, setPeloSel] = useState("");
-    const [PeloBorrar, setPeloBorrar]=useState("");
+    const [NapSel,setNapSel] = useState("");
+    const [NAPBorrar, setNAPBorrar]=useState("");
 
     useEffect(() => {
-        axios.get('https://localhost:7097/api/ControladorDatos/PelosFibra')
+        axios.get('https://localhost:7097/api/ControladorDatos/Naps')
             .then(response => {
                 const data = response.data;
-                setPelos(data);
+                setNaps(data);
                 setTotalPages(Math.ceil(data.length / itemsPerPage));
-                setPaginatedPelos(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+                setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
                 setLoading(false);
             })
             .catch(error => {
@@ -37,7 +37,7 @@ const ListaPelo = () => {
         setCurrentPage(pageNumber);
         const startIndex = (pageNumber - 1) * itemsPerPage;
         const endIndex = pageNumber * itemsPerPage;
-        setPaginatedPelos(Pelos.slice(startIndex, endIndex));
+        setpaginatedTr(Naps.slice(startIndex, endIndex));
     };
 
     if (loading) {
@@ -48,49 +48,50 @@ const ListaPelo = () => {
         );
     }
 
-    const CargarPelo = () => {
-        navigate("/CrearPelo");
+    const CargarNap = () => {
+        navigate("/CrearNap");
     }
 
     const BorrarClick = (ID) => {
-        setPeloBorrar(ID)
+        setNAPBorrar(ID);
         setShowModal(true);
     }
 
     const BorrarSeleccionado = () => {
-        if (PeloBorrar===null) return;
-        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarPelo/${PeloBorrar}`)
-        .then(response=>{
-            setPelos(Pelos.filter(pelo => pelo.idPeloFibra !== PeloBorrar));
+        if (NAPBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarNap/${NAPBorrar}`)
+        .then(response =>{
+            setNaps(Naps.filter(nap =>nap.idNAP !==NAPBorrar))
             setShowModal(false);
-            alert("Pelo de Fibra eliminado exitosamente")
+            alert("NAP eliminada exitosamente");
         })
-        .catch(error=>{
-            console.error("Hubo un Error al eliminar el PeloF",error)
-            setShowModal(false)
-            alert(`Hubo un Error al eliminar el Pelo de FIbra : ${error}`)
-        })        
+        .catch(error =>{
+            console.error("Hubo un error al eliminar la NAP",error);
+            setShowModal(false);
+            alert("Hubo un error al eliminar la NAP");
+        })
     }
 
+
     const VerClick = (ID) => {
-        const peloseleccionado = Pelos.find(pelo => pelo.idPeloFibra === ID);
-        setPeloSel(peloseleccionado);
+        const napseleccionada = Naps.find(nap => nap.idNAP === ID);
+        setNapSel(napseleccionada);
         setShowDetalle(true);
     }
 
     const DescargarPlanilla = () => {
-        const ws = XLSX.utils.json_to_sheet(Pelos);
+        const ws = XLSX.utils.json_to_sheet(Naps);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Pelos');
-        XLSX.writeFile(wb, 'Pelos.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Naps');
+        XLSX.writeFile(wb, 'Naps.xlsx');
     }
 
     return (
         <div>
             <div className="header">
-                <h1>Lista de Pelos de Fibra</h1>
+                <h1>Lista de Naps</h1>
                 <div className='Btn-Header'>
-                    <button onClick={CargarPelo}>Cargar Pelo</button>
+                    <button onClick={CargarNap}>Cargar Nap</button>
                     <button onClick={DescargarPlanilla}>Descargar Plantilla</button>
                 </div>
             </div>
@@ -99,37 +100,40 @@ const ListaPelo = () => {
                     <table id="example" className="table" style={{ width: '100%' }}>
                         <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>ColorBuffer</th>
-                                <th>ColorPelo</th>
+                                <th>IDNap</th>
+                                <th>CódigoNAP</th>
+                                <th>Ubicación</th>
+                                <th>DistanciaOptica</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedPelos.length > 0 ? (
-                                paginatedPelos.map(pelo => (
-                                    <tr key={pelo.idPeloFibra}>
-                                        <td>{pelo.idPeloFibra}</td>
-                                        <td>{pelo.colorBuffer}</td>
-                                        <td>{pelo.colorPelo}</td>
+                            {paginatedTr.length > 0 ? (
+                                paginatedTr.map(nap => (
+                                    <tr key={nap.idNAP}>
+                                        <td>{nap.idNAP}</td>
+                                        <td>{nap.codigoNap}</td>
+                                        <td>{nap.ubicacion}</td>
+                                        <td>{nap.distanciaOptica}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <Link to={`/EditarPelo/${pelo.idPeloFibra}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
-                                            <i onClick={()=>BorrarClick(pelo.idPeloFibra)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
-                                            <i onClick={() => VerClick(pelo.idPeloFibra)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <Link to={`/EditarNap/${nap.idNAP}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
+                                            <i onClick={()=>BorrarClick(nap.idNAP)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={() => VerClick(nap.idNAP)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4">No hay Pelos de Fibra disponibles.</td>
+                                    <td colSpan="4">No hay Naps disponibles.</td>
                                 </tr>
                             )}
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th>Id</th>
-                                <th>ColorBuffer</th>
-                                <th>ColorPelo</th>
+                                <th>IDNap</th>
+                                <th>CodigoNAP</th>
+                                <th>Ubicación</th>
+                                <th>DistanciaOptica</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -152,7 +156,7 @@ const ListaPelo = () => {
                     <Modal.Title>Confirmar eliminación</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    ¿Estás seguro de que deseas eliminar este Pelo de Fibra?
+                    ¿Estás seguro de que deseas eliminar esta Nap?
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -170,38 +174,47 @@ const ListaPelo = () => {
                     <Modal.Title>Detalles</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {PeloSel ? (
+                    {NapSel ? (
                         <>
-                            <div className="form-group">
-                                <label className="form-label">Color del Buffer</label>
+                             <div className="form-group">
+                                <label className="form-label">ID de Nap</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={PeloSel.colorBuffer || ''}
+                                    value={NapSel.idNAP || ''}
+                                    readOnly
+                                />
+                            </div>                       
+                            <div className="form-group">
+                                <label className="form-label">Código de Nap</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={NapSel.codigoNap || ''}
                                     readOnly
                                 />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Color del Pelo</label>
+                                <label className="form-label">Ubicación</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={PeloSel.colorPelo || ''}
+                                    value={NapSel.ubicacion || ''}
                                     readOnly
                                 />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">ID Troncal</label>
+                                <label className="form-label">DistanciaOptica</label>
                                 <input
-                                    type="text"
+                                    type="number"
                                     className="form-control"
-                                    value={PeloSel.troncal || ''}
+                                    value={NapSel.distanciaOptica || ''}
                                     readOnly
                                 />
                             </div>
                         </>
                     ) : (
-                        <p>No se encontraron detalles del Pelo de Fibra.</p>
+                        <p>No se encontraron detalles de la NAP.</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
@@ -214,4 +227,4 @@ const ListaPelo = () => {
     )
 }
 
-export default ListaPelo;
+export default ListaNap;

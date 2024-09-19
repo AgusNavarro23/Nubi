@@ -12,11 +12,12 @@ const ListaODF = () => {
     const [ShowModal,setShowModal]=useState(false);
     const [ShowDetalle,setShowDetalle]=useState(false);
     const [ODFSel,setODFSel]=useState("");
+    const [ODFBorrar,setODFBorrar]=useState("");
     
     
     useEffect(() => {
         // Reemplaza la URL con la de tu API
-        axios.get('http://localhost:5242/api/MantenimientosControlador/ODF')
+        axios.get('https://localhost:7097/api/ControladorDatos/ODFs')
             .then(response => {
                 setODFs(response.data);
                 setLoading(false);
@@ -38,14 +39,25 @@ const ListaODF = () => {
         navigate("/CrearODF")
     }
 
-    const BorrarClick = ()=>{
+    const BorrarClick = (ID)=>{
+        setODFBorrar(ID)
         setShowModal(true);
     }
     const BorrarSeleccionado =()=>{
-
+        if (ODFBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarODF/${ODFBorrar}`)
+        .then(response=>{
+            setODFs(ODFs.filter(odf => odf.idODF !== ODFBorrar));
+            setShowModal(false);
+        })
+        .catch(error=>{
+            console.error("Hubo un Error al eliminar el ODF",error)
+            setShowModal(false)
+            console.log(ODFBorrar)
+        })
     }
     const VerClick=(ID)=>{
-        const odfseleccionado = ODFs.find(odf => odf.idOdf===ID);
+        const odfseleccionado = ODFs.find(odf => odf.idODF===ID);
         setODFSel(odfseleccionado);
         console.log(ODFSel)
         setShowDetalle(true);
@@ -80,14 +92,14 @@ const ListaODF = () => {
                     <tbody>
                         {ODFs.length > 0 ? (
                             ODFs.map(odf => (
-                                <tr key={odf.idOdf}>
-                                    <td>{odf.idOdf}</td>
-                                    <td>{odf.nombre}</td>
-                                    <td>{odf.puertos}</td>
+                                <tr key={odf.idODF}>
+                                    <td>{odf.idODF}</td>
+                                    <td>{odf.odf_Nombre}</td>
+                                    <td>{odf.odf_Puertos}</td>
                                     <td style={{padding:'10px'}}>
-                                        <Link to={`/EditarODF/${odf.idOdf}`}><i className="bi bi-pencil-square" style={{padding:'5px', color:'#E58A92'}}></i></Link>
-                                        <i onClick={BorrarClick} className="bi bi-trash" style={{padding:'5px',color:'#E58A92'}}></i>
-                                        <i onClick={() => VerClick(odf.idOdf)} className="bi bi-eye" style={{padding:'5px',color:'#E58A92'}}></i>
+                                        <Link to={`/EditarODF/${odf.idODF}`}><i className="bi bi-pencil-square" style={{padding:'5px', color:'#E58A92'}}></i></Link>
+                                        <i onClick={()=> BorrarClick(odf.idODF)} className="bi bi-trash" style={{padding:'5px',color:'#E58A92'}}></i>
+                                        <i onClick={() => VerClick(odf.idODF)} className="bi bi-eye" style={{padding:'5px',color:'#E58A92'}}></i>
                                     </td>
                                 </tr>
                             ))
@@ -138,7 +150,7 @@ const ListaODF = () => {
                         <input 
                             type="text" 
                             className="form-control" 
-                            value={ODFSel.nombre || ''} 
+                            value={ODFSel.odf_Nombre || ''} 
                             readOnly 
                         />
                     </div>
@@ -147,16 +159,7 @@ const ListaODF = () => {
                         <input 
                             type="text" 
                             className="form-control" 
-                            value={ODFSel.puertos || ''} 
-                            readOnly 
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label className="form-label">Marca de ODF</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            value={ODFSel.marca || ''} 
+                            value={ODFSel.odf_Puertos || ''} 
                             readOnly 
                         />
                     </div>

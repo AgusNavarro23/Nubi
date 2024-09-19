@@ -5,26 +5,26 @@ import { useNavigate } from 'react-router-dom';
 import { Modal, Button, Pagination } from 'react-bootstrap';
 import * as XLSX from 'xlsx';  // Importa la biblioteca XLSX
 
-const ListaPelo = () => {
-    const [Pelos, setPelos] = useState([]);
+const ListaCliente = () => {
+    const [Clientes, setClientes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8); // Número de items por página
     const [totalPages, setTotalPages] = useState(1);
-    const [paginatedPelos, setPaginatedPelos] = useState([]);
+    const [paginatedTr, setpaginatedTr] = useState([]);
     const navigate = useNavigate();
     const [ShowModal, setShowModal] = useState(false);
     const [ShowDetalle, setShowDetalle] = useState(false);
-    const [PeloSel, setPeloSel] = useState("");
-    const [PeloBorrar, setPeloBorrar]=useState("");
+    const [CliSel,setCliSel] = useState("");
+    const [CliBorrar,setCliBorrar]=useState("");
 
     useEffect(() => {
-        axios.get('https://localhost:7097/api/ControladorDatos/PelosFibra')
+        axios.get('https://localhost:7097/api/ControladorDatos/CargarClientes')
             .then(response => {
                 const data = response.data;
-                setPelos(data);
+                setClientes(data);
                 setTotalPages(Math.ceil(data.length / itemsPerPage));
-                setPaginatedPelos(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+                setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
                 setLoading(false);
             })
             .catch(error => {
@@ -37,7 +37,7 @@ const ListaPelo = () => {
         setCurrentPage(pageNumber);
         const startIndex = (pageNumber - 1) * itemsPerPage;
         const endIndex = pageNumber * itemsPerPage;
-        setPaginatedPelos(Pelos.slice(startIndex, endIndex));
+        setpaginatedTr(Clientes.slice(startIndex, endIndex));
     };
 
     if (loading) {
@@ -48,49 +48,47 @@ const ListaPelo = () => {
         );
     }
 
-    const CargarPelo = () => {
-        navigate("/CrearPelo");
+    const CargarCliente = () => {
+        navigate("/CrearCliente");
     }
 
     const BorrarClick = (ID) => {
-        setPeloBorrar(ID)
         setShowModal(true);
+        setCliBorrar(ID)
     }
 
     const BorrarSeleccionado = () => {
-        if (PeloBorrar===null) return;
-        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarPelo/${PeloBorrar}`)
+        if (CliBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarCliente/${CliBorrar}`)
         .then(response=>{
-            setPelos(Pelos.filter(pelo => pelo.idPeloFibra !== PeloBorrar));
+            setClientes(Clientes.filter(cliente => cliente.idCliente !== CliBorrar));
             setShowModal(false);
-            alert("Pelo de Fibra eliminado exitosamente")
         })
         .catch(error=>{
-            console.error("Hubo un Error al eliminar el PeloF",error)
+            console.error("Hubo un Error al eliminar el Cliente",error)
             setShowModal(false)
-            alert(`Hubo un Error al eliminar el Pelo de FIbra : ${error}`)
-        })        
+        })
     }
 
     const VerClick = (ID) => {
-        const peloseleccionado = Pelos.find(pelo => pelo.idPeloFibra === ID);
-        setPeloSel(peloseleccionado);
+        const clienteseleccionado = Clientes.find(clientes => clientes.idCliente === ID);
+        setCliSel(clienteseleccionado);
         setShowDetalle(true);
     }
 
     const DescargarPlanilla = () => {
-        const ws = XLSX.utils.json_to_sheet(Pelos);
+        const ws = XLSX.utils.json_to_sheet(Clientes);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Pelos');
-        XLSX.writeFile(wb, 'Pelos.xlsx');
+        XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
+        XLSX.writeFile(wb, 'Clientes.xlsx');
     }
 
     return (
         <div>
             <div className="header">
-                <h1>Lista de Pelos de Fibra</h1>
+                <h1>Lista de Clientes</h1>
                 <div className='Btn-Header'>
-                    <button onClick={CargarPelo}>Cargar Pelo</button>
+                    <button onClick={CargarCliente}>Cargar Cliente</button>
                     <button onClick={DescargarPlanilla}>Descargar Plantilla</button>
                 </div>
             </div>
@@ -100,36 +98,42 @@ const ListaPelo = () => {
                         <thead>
                             <tr>
                                 <th>Id</th>
-                                <th>ColorBuffer</th>
-                                <th>ColorPelo</th>
+                                <th>Nombre</th>
+                                <th>Domicilio</th>
+                                <th>Telefono</th>
+                                <th>Correo</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {paginatedPelos.length > 0 ? (
-                                paginatedPelos.map(pelo => (
-                                    <tr key={pelo.idPeloFibra}>
-                                        <td>{pelo.idPeloFibra}</td>
-                                        <td>{pelo.colorBuffer}</td>
-                                        <td>{pelo.colorPelo}</td>
+                            {paginatedTr.length > 0 ? (
+                                paginatedTr.map(cliente => (
+                                    <tr key={cliente.idCliente}>
+                                        <td>{cliente.idCliente}</td>
+                                        <td>{cliente.nombre}</td>
+                                        <td>{cliente.domicilio}</td>
+                                        <td>{cliente.correo}</td>
+                                        <td>{cliente.telefono}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <Link to={`/EditarPelo/${pelo.idPeloFibra}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
-                                            <i onClick={()=>BorrarClick(pelo.idPeloFibra)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
-                                            <i onClick={() => VerClick(pelo.idPeloFibra)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <Link to={`/EditarBotella/${cliente.idCliente}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
+                                            <i onClick={()=>BorrarClick(cliente.idCliente)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={() => VerClick(cliente.idCliente)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4">No hay Pelos de Fibra disponibles.</td>
+                                    <td colSpan="4">No hay Clientes disponibles.</td>
                                 </tr>
                             )}
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th>Id</th>
-                                <th>ColorBuffer</th>
-                                <th>ColorPelo</th>
+                                <th>Nombre</th>
+                                <th>Domicilio</th>
+                                <th>Telefono</th>
+                                <th>Correo</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -152,7 +156,7 @@ const ListaPelo = () => {
                     <Modal.Title>Confirmar eliminación</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    ¿Estás seguro de que deseas eliminar este Pelo de Fibra?
+                    ¿Estás seguro de que deseas eliminar este Cliente?
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -170,38 +174,56 @@ const ListaPelo = () => {
                     <Modal.Title>Detalles</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {PeloSel ? (
+                    {CliSel ? (
                         <>
                             <div className="form-group">
-                                <label className="form-label">Color del Buffer</label>
+                                <label className="form-label">ID de Cliente</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={PeloSel.colorBuffer || ''}
+                                    value={ CliSel.idCliente|| ''}
                                     readOnly
                                 />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Color del Pelo</label>
+                                <label className="form-label">Nombre</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={PeloSel.colorPelo || ''}
+                                    value={CliSel.nombre || ''}
                                     readOnly
                                 />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">ID Troncal</label>
+                                <label className="form-label">Domicilio</label>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    value={PeloSel.troncal || ''}
+                                    value={CliSel.domicilio || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Telefono</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={CliSel.telefono || ''}
+                                    readOnly
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Correo</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={CliSel.correo || ''}
                                     readOnly
                                 />
                             </div>
                         </>
                     ) : (
-                        <p>No se encontraron detalles del Pelo de Fibra.</p>
+                        <p>No se encontraron detalles del cliente.</p>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
@@ -214,4 +236,4 @@ const ListaPelo = () => {
     )
 }
 
-export default ListaPelo;
+export default ListaCliente;

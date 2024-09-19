@@ -3,12 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Form, Button, Modal } from 'react-bootstrap';
 import Papa from 'papaparse';
 import '../Estilos/EstiloForm.css';
+import axios from 'axios';
 
 const CrearODF = () => {
     const navigate = useNavigate();
     const [archivo, setArchivo] = useState(null);
     const [csvData, setCsvData] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [nombreODF,setnombreODF]=useState("");
+    const [puertosODF,setpuertosODF]=useState("");
     const Volver = () => {
         navigate("/ListaODF");
     };
@@ -72,6 +75,22 @@ const CrearODF = () => {
         );
     };
 
+    const EnviarODF = async ()=>{
+        const NuevoODF ={
+            odf_Nombre:nombreODF,
+            odf_Puertos:puertosODF
+        };
+        try{
+            await axios.post('https://localhost:7097/api/ControladorDatos/CrearODF', NuevoODF);
+            alert("ODF creado exitosamente")
+            navigate("/ListaODF")
+        }
+        catch(error){
+            console.error('Hubo un error al crear el ODF:', error.response || error.message);
+            alert("Error al crear el ODF: " + (error.response?.data || error.message));
+        }
+    }
+
     return (
         <div className="container">
             <div className="card">
@@ -83,14 +102,18 @@ const CrearODF = () => {
                             <Form.Control
                                 type="text"
                                 placeholder="Ingrese Nombre de ODF"
+                                value={nombreODF}
+                                onChange={(e) => setnombreODF(e.target.value)}
                                 style={{ maxWidth: '40vw' }}
                             />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Puertos de ODF</Form.Label>
                             <Form.Control
-                                type="text"
+                                type="number"
                                 placeholder="Ingrese Cantidad de Puertos de ODF"
+                                value={puertosODF}
+                                onChange={(e)=> setpuertosODF(e.target.value)}
                                 style={{ maxWidth: '40vw' }}
                             />
                         </Form.Group>
@@ -104,7 +127,7 @@ const CrearODF = () => {
                             />
                         </Form.Group>
                         <footer>
-                            <Button className="Btn-ODF" type="submit" style={{ marginRight: '5%' }}>
+                            <Button className="Btn-ODF" onClick={EnviarODF} style={{ marginRight: '5%' }}>
                                 Registrar ODF
                             </Button>
                             <Button className="Btn-ODF" onClick={Volver}>
