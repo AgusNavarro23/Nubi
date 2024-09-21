@@ -91,8 +91,11 @@ const CrearBotella = () => {
     };
 
     return (
-        <div className="container">
-            <div className="card">
+        <div >
+            <div className="header">
+
+            </div>
+            <div className="card" style={{marginLeft:'5%'}}>
                 <div className="card-body" style={{ minWidth: '40vw', minHeight: '60vh', justifyContent: 'center' }}>
                     <h2 style={{ marginBottom: '3%' }}>Cargar Botella</h2>
                     {alert.message && (

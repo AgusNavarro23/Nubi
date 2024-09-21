@@ -63,8 +63,11 @@ const EditarPelo =()=>{
     }
 
     return (
-        <div className="container">
-            <div className="card">
+        <div >
+            <div className="header">
+
+            </div>
+            <div className="card" style={{marginLeft:'5%'}}>
             {alert.message && (
                         <div className={`alert alert-${alert.type}`} role="alert">
                         {alert.message}

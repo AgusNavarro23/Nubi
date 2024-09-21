@@ -1,6 +1,6 @@
 :root{
     --color-barra-lateral:#C92C39;
-    --color-item-hover:rgb(74, 105, 189);
+    --color-item-hover:#4892e7;
     --color-textos: rgb(255,255,255);
     --color-textos-menu:rgb(255, 255, 255);
   }
@@ -12,77 +12,13 @@
       display: flex;
       flex-flow: row; 
   }
-  ul{
-    margin-top: 10px;
-    width: 100%;
-  }
-  .navbar{
-    display: flex;
-    flex-flow: column;
-    justify-content: space-between;
-    width: 100%;
-    align-items: center;
-  }
-  .navbar li{
-    padding-left: 0px;
-    width: 100%;
-  }
-  .navbar li a{
-    color: white;
-  }
-  .navbar li:hover{
-    background-color: var(--color-item-hover);
-  }
-  .slidebar{
-      min-width: 250px;
-      width: 250px;
-      height: 100%;
-      padding: 20px 15px;
-      background-color: var(--color-barra-lateral);
-      height: 100vh;
-  }
-  .slidebar a{
-    text-decoration: none;
-  }
-  .form-serch{
-    display: flex;
-    flex-flow: row nowrap;
-  }
-  .searchinput{
-    width: 180px;
-  }
-  .slidebar .name_pagina{
-      font-size: 26px;
-      text-decoration: none;
-      height: 60px;
-      text-align: center;
-  }
-  .slidebar span{
-    color: white;
-  }
-  .barra-navegacion{
-    display: flex;
-    flex-flow: column;
-    justify-content: space-between;
-    height: 80vh;
-  }
-  .barra-navegacion li{
-    list-style: none;
-    display: flex;
-    margin-bottom: 5px;
-    width: 100%;
-    height: 30px;
-    text-decoration: none;
-    align-items: center;
-    border-radius: 10px;
-    color:var(--color-textos-menu);
-    
-  }
-
-  .bg_dark{
-    color: white;
-    background-color: #470561;
-  }
+ 
+.nav-pills li{
+  margin-bottom: 15px;
+}
+.nav-pills li a:hover{
+  border: 2px solid  #C92C39;
+}
   .color-black{
     color: black;
   }
@@ -94,65 +30,6 @@
   .user{
     margin: 10px;
   }
-
-
-
-  .d-flex-sp{
-    display: flex;
-    flex-flow: row;
-    justify-content: space-between;
-  }
-
-
-
-
-    .form-wrapper {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        margin-top: 20px;
-    }
-    h1 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 20px;
-        font-size: 2em;
-    }
-    form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-    .form-group {
-        display: flex;
-        flex-direction: column;
-    }
-    .form-group label {
-        margin-bottom: 5px;
-        color: #333;
-        font-weight: bold;
-    }
-    .form-group input, .form-group select, .form-group textarea {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 1em;
-    }
-    button {
-        background-color: #c90a99;
-        color: white;
-        border: none;
-        padding: 10px 10px;
-        border-radius: 4px;
-        font-size: 1em;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        margin-top: 10px;
-    }
-    button:hover {
-        background-color: #7d0de6f8;
-    }
     .cancel-link {
         display: block;
         text-align: center;
@@ -172,15 +49,6 @@
       border: 1px solid #ccc; /* Opcional, para visualizar el área */
       padding: 10px;
     }  
-
-    button{
-      background-color:#E58A92;
-    }
-    button:hover{
-      background-color: white;
-      color: #E58A92;
-      border: 1px solid #E58A92;
-    }
 
   .header{
     display: flex;
@@ -233,14 +101,4 @@
 }
 @keyframes l23 {
   100% {transform: rotate(1turn)}
-}
-
-.modal-custom .modal-dialog {
-  max-width: 95vw;
-  max-height: 95vh;
-  margin: auto;
-}
-
-.modal-custom .modal-content {
-  height: 100%;
 }

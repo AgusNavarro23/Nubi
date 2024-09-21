@@ -1,31 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
-import { Modal,Button } from 'react-bootstrap';
-import * as XLSX from 'xlsx';  // Importa la biblioteca XLSX
+import { Modal,Button,Pagination,ModalTitle,Form } from 'react-bootstrap';
+import Swal from 'sweetalert2';
 
 const ListaODF = () => {
     const [ODFs, setODFs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const navigate=useNavigate();
     const [ShowModal,setShowModal]=useState(false);
     const [ShowDetalle,setShowDetalle]=useState(false);
     const [ODFSel,setODFSel]=useState("");
     const [ODFBorrar,setODFBorrar]=useState("");
+    const [showFormulario,setShowFormulario]=useState(false);
     
+    //Variables para la carga de datos
+    const [nombreODF,setNombreODF] = useState("")
+    const [puertosODF,setPuertosODF] = useState("")
     
-    useEffect(() => {
-        // Reemplaza la URL con la de tu API
+    const CargarOdfs=()=>{
         axios.get('https://localhost:7097/api/ControladorDatos/ODFs')
-            .then(response => {
-                setODFs(response.data);
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Hubo un error al obtener los ODFs:', error);
-                setLoading(false);
-            });
+        .then(response => {
+            setODFs(response.data);
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Hubo un error al obtener los ODFs:', error);
+            setLoading(false);
+        });
+    }
+
+    useEffect(() => {
+        CargarOdfs();
     }, []);
 
     if (loading) {
@@ -35,25 +40,39 @@ const ListaODF = () => {
             </div>  
         );
     }
-    const CargarODF=()=>{
-        navigate("/CrearODF")
-    }
-
     const BorrarClick = (ID)=>{
         setODFBorrar(ID)
         setShowModal(true);
     }
     const BorrarSeleccionado =()=>{
         if (ODFBorrar===null) return;
+        Swal.fire({
+            title: 'Cargando...',
+            text: 'Guardando el mantenimiento...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
         axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarODF/${ODFBorrar}`)
         .then(response=>{
-            setODFs(ODFs.filter(odf => odf.idODF !== ODFBorrar));
-            setShowModal(false);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'El ODF ha sido eliminado exitosamente.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                setShowModal(false);
+                CargarOdfs();
+            });
         })
         .catch(error=>{
-            console.error("Hubo un Error al eliminar el ODF",error)
-            setShowModal(false)
-            console.log(ODFBorrar)
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al eliminar el ODF.',
+                confirmButtonText: 'OK'
+            });
         })
     }
     const VerClick=(ID)=>{
@@ -61,21 +80,63 @@ const ListaODF = () => {
         setODFSel(odfseleccionado);
         console.log(ODFSel)
         setShowDetalle(true);
-
     }
-    const DescargarPlanilla=()=>{
-        const ws = XLSX.utils.json_to_sheet(ODFs);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb,ws,'ODFS');
-        XLSX.writeFile(wb,'ODFs.xlsx');
+    const GuardarODF=()=>{
+        const ODF ={
+            odf_Nombre:nombreODF,
+            odf_Puertos:puertosODF,
+        }
+        if (!nombreODF || !puertosODF) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Todos los campos son requeridos.',
+                confirmButtonText: 'OK'
+            });
+            return; // Salir si hay campos faltantes
+        }
+        else{
+            Swal.fire({
+                title: 'Cargando...',
+                text: 'Guardando el mantenimiento...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            axios.post('https://localhost:7097/api/ControladorDatos/CrearODF', ODF, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+            .then(response => {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'El ODF ha sido guardado correctamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    setShowFormulario(false);
+                    CargarOdfs();
+                });
+            })
+            .catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un problema al guardar el mantenimiento.',
+                    confirmButtonText: 'OK'
+                });
+                console.error('Error al guardar mantenimiento:', error.response.data.errors); // Mostrar más detalles del error
+            });
+        }
     }
     return (
         <div>
             <div className="header">
                 <h1>Lista de ODFs</h1>
                 <div className='Btn-Header'>
-                    <button onClick={CargarODF}>Cargar ODF</button>
-                    <button onClick={DescargarPlanilla}>Descargar Plantilla</button>
+                    <Button onClick={()=>setShowFormulario(true)} className='btn-Crear'>Cargar ODF</Button>
                 </div>
             </div>
             <div class="card" style={{marginLeft:'5%',marginTop:'6%'}}>
@@ -97,7 +158,6 @@ const ListaODF = () => {
                                     <td>{odf.odf_Nombre}</td>
                                     <td>{odf.odf_Puertos}</td>
                                     <td style={{padding:'10px'}}>
-                                        <Link to={`/EditarODF/${odf.idODF}`}><i className="bi bi-pencil-square" style={{padding:'5px', color:'#E58A92'}}></i></Link>
                                         <i onClick={()=> BorrarClick(odf.idODF)} className="bi bi-trash" style={{padding:'5px',color:'#E58A92'}}></i>
                                         <i onClick={() => VerClick(odf.idODF)} className="bi bi-eye" style={{padding:'5px',color:'#E58A92'}}></i>
                                     </td>
@@ -169,10 +229,47 @@ const ListaODF = () => {
                     )}
                 </Modal.Body>
                 <Modal.Footer>
-                <Button variant="info" onClick={() => setShowDetalle(false)}>
+                <Button variant="primary" onClick={() => setShowDetalle(false)}>
                             Volver
                         </Button>
                 </Modal.Footer>
+            </Modal>
+            <Modal show={showFormulario} onHide={()=>setShowFormulario(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Cargar ODF</Modal.Title>
+                </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            <Form.Group className='mb-3'>
+                                <Form.Label>Nombre de ODF</Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    value={nombreODF}
+                                    onChange={(e)=>setNombreODF(e.target.value)}
+                                />
+                            </Form.Group>
+                            <Form.Group className='mb-3'>
+                                <Form.Label>Cantidad de Puertos</Form.Label>
+                                <Form.Select
+                                    value={puertosODF}
+                                    onChange={(e)=>setPuertosODF(e.target.value)}
+                                >
+                                    <option>Selecciona la cantidad de puertos</option>
+                                    <option>12</option>
+                                    <option>24</option>
+                                    <option>48</option>
+                                    <option>96</option>
+                                    <option>144</option>
+                                </Form.Select>
+                            </Form.Group>
+                        </Form>
+                        <Modal.Footer>
+                            <Button variant="primary" onClick={GuardarODF}>
+                                Guardar
+                            </Button>
+                            <Button variant='secondary' onClick={()=>setShowFormulario(false)}>Cancelar</Button>
+                        </Modal.Footer>
+                    </Modal.Body>
             </Modal>
         </div>
     );

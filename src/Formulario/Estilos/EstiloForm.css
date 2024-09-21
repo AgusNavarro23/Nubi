@@ -7,13 +7,13 @@
     border: 1px solid #E58A92;
 }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 80vw; /* Asegúrate de que el contenedor ocupe toda la anchura de la página */
-    border: none;
-}
 .card-body{
     border: 2px solid #E58A92;
+}
+
+.btn-Crear{
+    background-color: #4892e7;
+}
+.btn-Crear:hover{
+    background-color: #d82534;
 }

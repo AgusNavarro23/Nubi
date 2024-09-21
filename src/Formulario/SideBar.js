@@ -2,10 +2,12 @@ import React from "react";
 import { Link} from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 import './Estilos/Home.css'
+import { Accordion } from 'react-bootstrap'; // Importar el componente Accordion
 
 
 
-const SideBar =()=>{
+
+function SideBar (){
     const {user,logout} = useAuth0()
     const CerrarSesion = () => {
       logout({
@@ -20,64 +22,97 @@ const SideBar =()=>{
       window.location.reload();
     };
   
-    return(
-        <div className="slidebar">
-  <div className="name_pagina">
-    <span>NUBICOM</span>
-  </div>
-  <nav className="barra-navegacion">
-    <div className="navbar">
-      <form className="form-serch" role="search">
-        <input className="form-control me-2 searchinput" type="search" placeholder="Search" aria-label="Search"/>
-        <button className="btn btn-outline-success" type="submit"><i className="bi bi-search"></i></button>
-      </form>
-      <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-        <li className="nav-item active">
-            <Link className="nav-link" to="/ListaODF">ODF</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaPelo">Pelo Fibra</Link>
-        </li>
-        <li className="nav-item active">
-            <Link className="nav-link" to="/ListaTroncal">Troncal</Link>
-      </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaBotella">Botellas</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="">Intervención</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaSpliter">Spliter</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaDistribucion">Distribuciones</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaNap">NAPS</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaServicio">Servicio</Link>
-        </li>
-        <li className="nav-item">
-            <Link className="nav-link" to="/ListaCliente">Clientes</Link>
-        </li>
-      </ul>
-    </div> 
-    <div className="usercontent">
-      <div>
-        <img src={user.picture} alt={user.name} style={{display:"flex",marginLeft:'auto',marginRight:'auto',padding:'10px'}} />
-        <span className="color-black">{user.name}</span>
+    return (
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-auto col-md-2 min-vh-100" style={{ width: '250px', backgroundColor: '#4892e7' }}>
+            <Link to="/home">
+              <a className="text-decoration-none text-white d-flex" style={{ backgroundColor: 'white', marginRight: '-20px', marginLeft: '-20px', marginBottom: '30px' }}>
+                <img src="Nubicom.png" alt="Logo" style={{ width: '100%' }} />
+              </a>
+            </Link>
+            <ul className="nav nav-pills flex-column">
+  
+              {/* Accordion for Datos */}
+              <Accordion style={{padding:'0px'}}>
+                <Accordion.Item eventKey="0" className="custom-acordeon" style={{marginBottom:'10px'}}>
+                  <Accordion.Header className="custom-acordeon-header" style={{ color: '#4892e7', marginTop:'-10px' }}>
+                    <i className="bi bi-database-fill-add" style={{color:'#4892e7'}}></i>
+                    <span className="ms-2" style={{color:'#4892e7'}}>Datos</span>
+                  </Accordion.Header>
+                  <Accordion.Body style={{ backgroundColor: 'white' }}>
+                    <ul className="list-unstyled">
+                      <li>
+                        <Link to="/ListaODF" className="nav-link text-cyan">ODF</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaTroncal" className="nav-link text-cyan">Troncales</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaPelo" className="nav-link text-cyan">Pelos de Fibra</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaBotella" className="nav-link text-cyan">Botella</Link>
+                      </li>
+                      <li>
+                        <Link to="/" className="nav-link text-cyan">Intervención</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaSpliter" className="nav-link text-cyan">Spliter</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaDistribucion" className="nav-link text-cyan">Distribucion</Link>
+                      </li>
+                      <li>
+                        <Link to="ListaNap" className="nav-link text-cyan">NAP</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaServicio" className="nav-link text-cyan">Servicio</Link>
+                      </li>
+                      <li>
+                        <Link to="/ListaCliente" className="nav-link text-cyan">Cliente</Link>
+                      </li>
+                    </ul>
+                  </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="1" style={{marginBottom:'10px'}}>
+                  <Accordion.Header style={{marginTop:'-10px', backgroundColor:'red' }}>
+                    <i className="bi bi-question-diamond-fill" style={{color:'#4892e7'}}></i>
+                    <span className="ms-2" style={{color:'#4892e7'}}>Mantenimientos</span>
+                  </Accordion.Header>
+                  <Accordion.Body style={{ backgroundColor: 'white' }}>
+                    <ul className="list-unstyled">
+                      <li>
+                        <Link to="/ListaMantenimientos" className="nav-link text-cyan">Lista de Mantenimientos</Link>
+                      </li>
+                      <li>
+                        <Link to="/MantenimientosProgramados" className="nav-link text-cyan">Mantenimientos Programados</Link>
+                      </li>
+                    </ul>
+                  </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="2" style={{marginBottom:'10px'}}>
+                  <Accordion.Header style={{ color: '#4892e7', marginTop:'-10px' }}>
+                    <i className="bi bi-exclamation-triangle-fill" style={{color:'#4892e7'}}> </i>
+                    <span className="ms-2" style={{color:'#4892e7'}}>Incidencias</span>
+                  </Accordion.Header>
+                  <Accordion.Body style={{ backgroundColor: 'white' }}>
+                    <ul className="list-unstyled">
+                      <li>
+                        <Link to="/ruta-datos-1" className="nav-link text-cyan">Lista de Incidencias</Link>
+                      </li>
+                      <li>
+                        <Link to="/ruta-datos-2" className="nav-link text-cyan">ETRs</Link>
+                      </li>
+                    </ul>
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
+            </ul>
+          </div>
+        </div>
       </div>
-      <form>
-        <button onClick={CerrarSesion}>Cerrar Sesión</button>
-    </form>
-    </div>
-  </nav>
-</div>
-
-
-    )
-}
+    );
+  }
 
 export default SideBar;

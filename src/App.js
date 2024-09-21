@@ -5,7 +5,6 @@ import Home from "./Formulario/Home";
 import LoginForms from "./Login/Loginforms";
 import './App.css';
 import Perfil from "./Usuario/Perfil";
-import CrearODF from "./Formulario/ODF/CrearODF.js";
 import SideBar from "./Formulario/SideBar";
 import CrearPelo from "./Formulario/PeloFibra/CrearPelo.js";
 import CrearTroncal from "./Formulario/Troncales/Creartroncal.js";
@@ -18,7 +17,7 @@ import CrearCliente from "./Formulario/Clientes/CrearCliente.js";
 import ListaODF from "./Formulario/ODF/ListaODF.js";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
-import EditarODF from "./Formulario/ODF/EditarODF.js";
+import 'react-calendar/dist/Calendar.css';
 import ListaPelo from "./Formulario/PeloFibra/ListaPelo.js";
 import EditarPelo from "./Formulario/PeloFibra/EditarPelo.js";
 import ListaTroncal from "./Formulario/Troncales/ListaTroncal.js";
@@ -34,6 +33,8 @@ import EditarNap from "./Formulario/NAPs/EditarNap.js";
 import ListaServicio from "./Formulario/Servicio/ListaServicio.js";
 import EditarServicio from "./Formulario/Servicio/EditarServicio.js";
 import ListaCliente from "./Formulario/Clientes/ListaCliente.js";
+import ListaMantenimientos from "./Mantenimientos/ListaMantenimientos.js";
+import MantenimientosProgramados from "./Mantenimientos/MantenimientosProgramados.js";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -52,8 +53,6 @@ function App() {
             <Route path="/home" element={isAuthenticated ? <Home /> : <Navigate to="/" />} />
             <Route path="/perfil" element={isAuthenticated ? <Perfil /> : <Navigate to="/" />} />
             <Route path="/ListaODF" element={isAuthenticated ? <ListaODF /> : <Navigate to="/" />} />
-            <Route path="/CrearODF" element={isAuthenticated ? <CrearODF /> : <Navigate to="/" />} />
-            <Route path="EditarODF/:id" element={isAuthenticated ? <EditarODF /> : <Navigate to="/" />} />
             <Route path="/ListaPelo" element={isAuthenticated ? <ListaPelo /> : <Navigate to="/" />} />
             <Route path="/CrearPelo" element={isAuthenticated ? <CrearPelo/> : <Navigate to="/" />} />
             <Route path="EditarPelo/:id" element={isAuthenticated ? <EditarPelo/> : <Navigate to="/" />} />
@@ -77,6 +76,9 @@ function App() {
             <Route path="/EditarServicio/:id" element={isAuthenticated ? <EditarServicio/> : <Navigate to="/" />} />
             <Route path="/ListaCliente" element={isAuthenticated ? <ListaCliente/> : <Navigate to="/" />} />
             <Route path="/CrearCliente" element={isAuthenticated ? <CrearCliente/> : <Navigate to="/" />} />
+            <Route path="/ListaMantenimientos" element={isAuthenticated ? <ListaMantenimientos/> : <Navigate to="/" />} />
+            <Route path="/MantenimientosProgramados" element={isAuthenticated ? <MantenimientosProgramados/> : <Navigate to="/" />} />
+
 
 
           </Routes>
