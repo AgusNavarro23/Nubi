@@ -4,4 +4,5 @@
   Abrir una terminal en Visual Studio Code y correr el comando npm install
   
 -¿Cómo abrir el Proyecto?
+
   Abrir una terminal en Visual Studio Code y correr el comando npm start
