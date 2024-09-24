@@ -1,32 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Modal,Button,Pagination,ModalTitle,Form } from 'react-bootstrap';
+import Select from 'react-select';
 import Swal from 'sweetalert2';
-import Select from 'react-select'
 
-const ListaSpliter = () => {
-    const [botellas,setBotellas]=useState([]);//Variable para cargar las Botellas
-    const [Spliters, setSpliters] = useState([]);//Variable para cargar los Spliters
+const ListaDistribucion2Nivel = () => {
+    const [botellas, setBotellas] = useState([]); //Variable para cargar las Botellas
+    const [Distribuciones, setDistribuciones] = useState([]);//Variable para cargar las Distribuciones
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8); // Número de items por página
     const [totalPages, setTotalPages] = useState(1);
     const [paginatedTr, setpaginatedTr] = useState([]);
-
     const [ShowModal, setShowModal] = useState(false);//Variable para el modal de Eliminar
     const [ShowDetalle, setShowDetalle] = useState(false);//Variable para el modal de Detalle
-    const [detalleSpliter,setDetalleSpliter] = useState({})
+    const [detalleDistribucion,setDetalleDistribucion] = useState({})
     const [showFormulario,setShowFormulario]=useState(false);//Variable para el modal de Formulario
+    const [disBorrar,setDisBorrar]=useState("");
 
+    //Variables para guardar Distribucion
+    const [descripcion, setDescripcion] = useState("");
+    const [distanciaOptica, setDistanciaOptica] = useState("");
+    const [botella2Nivel,setBotella2Nivel ] = useState("");
 
-    //Variables para guardar Spliter
-    const [sector,setSector]=useState("");
-    const [casette,setCassette]=useState("");
-    const [botella,setBotella]=useState("");
-
-
-    const CargarDatos=()=>{
-        axios.get('https://localhost:7097/api/ControladorDatos/Botellas')
+    const CargarDatos =()=>{
+        axios.get('https://localhost:7097/api/ControladorDatos/Distribucion2Nivel')
+        .then(response => {
+            const data = response.data;
+            setDistribuciones(data);
+            setTotalPages(Math.ceil(data.length / itemsPerPage));
+            setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Hubo un error al obtener las Distribuciones:', error);
+            setLoading(false);
+        });
+        axios.get('https://localhost:7097/api/ControladorDatos/Botellas2Nivel')
             .then(response => {
                 const data = response.data;
                 setBotellas(data);
@@ -36,18 +46,6 @@ const ListaSpliter = () => {
                 console.error('Hubo un error al obtener las Botellas:', error);
                 setLoading(false);
             });
-        axios.get('https://localhost:7097/api/ControladorDatos/Spliters')
-        .then(response => {
-            const data = response.data;
-            setSpliters(data);
-            setTotalPages(Math.ceil(data.length / itemsPerPage));
-            setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));                
-            setLoading(false);
-        })
-        .catch(error => {
-            console.error('Hubo un error al obtener los Spliters:', error);
-            setLoading(false);
-        });    
     }
 
     useEffect(() => {
@@ -58,8 +56,13 @@ const ListaSpliter = () => {
         setCurrentPage(pageNumber);
         const startIndex = (pageNumber - 1) * itemsPerPage;
         const endIndex = pageNumber * itemsPerPage;
-        setpaginatedTr(Spliters.slice(startIndex, endIndex));
+        setpaginatedTr(Distribuciones.slice(startIndex, endIndex));
     };
+    const LimpiarFormulario=()=>{
+        setDescripcion("");
+        setDistanciaOptica("");
+        setBotella2Nivel("");
+    }
 
     if (loading) {
         return (
@@ -68,31 +71,51 @@ const ListaSpliter = () => {
             </div>
         );
     }
-    const LimpiarFormulario=()=>{
-        setSector("");
-        setCassette("");
-        setBotella("");
-    }
-    const BorrarClick = () => {
+
+    const BorrarClick = (ID) => {
+        setDisBorrar(ID)
         setShowModal(true);
     }
 
     const BorrarSeleccionado = () => {
-        // Implementa la lógica para borrar el elemento seleccionado
+        if (disBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarDistribucion2Nivel/${disBorrar}`)
+        .then(response=>{
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'La distribución ha sido eliminada exitosamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    setShowModal(false)
+                    CargarDatos();
+                });
+        })
+        .catch(error=>{
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al eliminar la distribución.',
+                confirmButtonText: 'OK'
+            });
+            setShowModal(false)
+        })}
+
+
+
+    const handleDetalles = (distribucion)=>{
+        setDetalleDistribucion(distribucion)
+        setShowDetalle(true)
     }
-    const handleDetlles=(spliter)=>{
-        setDetalleSpliter(spliter)
-        setShowDetalle(true);
-    }
-    const botellaDescripcion = botellas.find(b => b.idBotella === detalleSpliter.botella)?.descripcion || 'No encontrada';
 
     const handleGuardar=()=>{
-        const spliter ={
-            sector,
-            casette,
-            botella
+        const distribucion ={
+            descripcion,
+            botella2Nivel
         }
-        if (!sector || !casette || !botella){
+        console.log(distribucion)
+        if (!descripcion || !botella2Nivel){
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -110,7 +133,7 @@ const ListaSpliter = () => {
                     Swal.showLoading();
                 }
             });
-            axios.post("https://localhost:7097/api/ControladorDatos/CrearSpliter",spliter,{
+            axios.post("https://localhost:7097/api/ControladorDatos/CrearDistribucion2Nivel",distribucion,{
                 headers:{
                     'Content-Type':'application/json'
                 }
@@ -119,7 +142,7 @@ const ListaSpliter = () => {
                 Swal.fire({
                     icon: 'success',
                     title: '¡Éxito!',
-                    text: 'El Spliter ha sido guardado correctamente.',
+                    text: 'La distribución ha sido guardado correctamente.',
                     confirmButtonText: 'OK'
                 }).then(() => {
                     setShowFormulario(false);
@@ -131,7 +154,7 @@ const ListaSpliter = () => {
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    text: 'Hubo un problema al guardar el Spliter.',
+                    text: 'Hubo un problema al guardar la distribución.',
                     confirmButtonText: 'OK'
                 });
             })
@@ -141,9 +164,9 @@ const ListaSpliter = () => {
     return (
         <div>
             <div className="header">
-                <h1>Lista de Spliters</h1>
+                <h1>Lista de Distribuciones2Nivel</h1>
                 <div className='Btn-Header'>
-                    <Button className='primary' onClick={()=>setShowFormulario(true)}>Cargar Spliter</Button>
+                    <Button className='primary' onClick={()=>setShowFormulario(true)}>Cargar Distribucion</Button>
                 </div>
             </div>
             <div className="card" style={{ marginLeft: '5%', marginTop: '6%' }}>
@@ -151,41 +174,31 @@ const ListaSpliter = () => {
                     <table id="example" className="table" style={{ width: '100%' }}>
                         <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Sector</th>
-                                <th>Casette</th>
+                                <th>ID</th>
+                                <th>Descripcion</th>
                                 <th>Botella</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedTr.length > 0 ? (
-                                paginatedTr.map(spliter => (
-                                    <tr key={spliter.idSpliter}>
-                                        <td>{spliter.idSpliter}</td>
-                                        <td>{spliter.sector}</td>
-                                        <td>{spliter.casette}</td>
-                                        <td>{spliter.botella}</td>
+                                paginatedTr.map(distribucion => (
+                                    <tr key={distribucion.idDistribucion2Nivel}>
+                                        <td>{distribucion.idDistribucion2Nivel}</td>
+                                        <td>{distribucion.descripcion}</td>
+                                        <td>{distribucion.botella2Nivel}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <i onClick={BorrarClick} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
-                                            <i onClick={() => handleDetlles(spliter)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={()=>BorrarClick(distribucion.idDistribucion2Nivel)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={() => handleDetalles(distribucion)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="4">No hay Spliters disponibles.</td>
+                                    <td colSpan="4">No hay Distribuciones disponibles.</td>
                                 </tr>
                             )}
                         </tbody>
-                        <tfoot>
-                            <tr>
-                                <th>Id</th>
-                                <th>Sector</th>
-                                <th>Casette</th>
-                                <th>Botella</th>
-                            </tr>
-                        </tfoot>
                     </table>
                     <Pagination>
                         {[...Array(totalPages)].map((_, index) => (
@@ -206,7 +219,7 @@ const ListaSpliter = () => {
                     <Modal.Title>Confirmar eliminación</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    ¿Estás seguro de que deseas eliminar este Spliter?
+                    ¿Estás seguro de que deseas eliminar esta Distribucion?
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
@@ -224,46 +237,39 @@ const ListaSpliter = () => {
                     <Modal.Title>Detalles del Troncal</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p><strong>Id:</strong> {detalleSpliter.idSpliter}</p>
-                    <p><strong>Sector:</strong> {detalleSpliter.sector}</p>
-                    <p><strong>Cassette:</strong> {detalleSpliter.casette}</p>
-                    <p><strong>Botella:</strong> {botellaDescripcion}</p> {/* Aquí se muestra la descripción de la botella */}
-                    </Modal.Body>
+                    <p><strong>Id:</strong> {detalleDistribucion.idDistribucionSector}</p>
+                    <p><strong>Nombre:</strong> {detalleDistribucion.descripcion}</p>
+                    <p><strong>Spliter:</strong> {detalleDistribucion.spliter}</p>
+                </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowDetalle(false)}>
                         Cerrar
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            {/* Modal para Formulario */}
             <Modal show={showFormulario} onHide={()=>setShowFormulario(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Cargar Spliter</Modal.Title>
+                    <Modal.Title>Cargar Distribucion2Nivel</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className='mb-3'>
-                                <Form.Label>Sector</Form.Label>
-                                <Form.Control
-                                    type='number'
-                                    value={sector}
-                                    onChange={(e)=>setSector(e.target.value)}
-                                />
-                        </Form.Group>
-                        <Form.Group className='mb-3'>
-                                <Form.Label>Cassette</Form.Label>
+                                <Form.Label>Nombre de Distribución</Form.Label>
                                 <Form.Control
                                     type='text'
-                                    value={casette}
-                                    onChange={(e)=>setCassette(e.target.value)}
+                                    value={descripcion}
+                                    onChange={(e)=>setDescripcion(e.target.value)}
                                 />
                         </Form.Group>
                         <Form.Group className='mb-3'>
-                                <Form.Label>ODF</Form.Label>
+                                <Form.Label>Botella</Form.Label>
                                 <Select
-                                    value={botellas.find(option => option.value === botella)} // Esto mantiene el valor seleccionado
-                                    onChange={(selectedOption) => setBotella(selectedOption.value)} // Obtén solo el valor
+                                    value={botellas.find(option => option.value === botella2Nivel)} // Esto mantiene el valor seleccionado
+                                    onChange={(selectedOption) => setBotella2Nivel(selectedOption.value)} // Obtén solo el valor
                                     options={botellas.map((item) => ({
-                                        value: item.idBotella,
+                                        value: item.idBotella2Nivel,
                                         label: item.descripcion
                                     }))}
                                 />
@@ -279,4 +285,4 @@ const ListaSpliter = () => {
     )
 }
 
-export default ListaSpliter;
+export default ListaDistribucion2Nivel;

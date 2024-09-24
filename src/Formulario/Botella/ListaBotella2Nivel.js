@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Modal,Button,Pagination,ModalTitle,Form } from 'react-bootstrap';
-import { MapContainer, TileLayer, Marker,Popup,useMap } from "react-leaflet";
+import { Modal,Button,Pagination,Form } from 'react-bootstrap';
+import { MapContainer, TileLayer, Marker} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import Swal from 'sweetalert2';
+import Select from 'react-select';
 
 //Se importan las librerias necesarias
 
@@ -16,8 +17,9 @@ const botellaIcon = new L.Icon({
 });
 
 
-const ListaBotella = () => {
-    const [Botellas, setBotellas] = useState([]); //Variable para cargar las botellas
+const ListaBotella2Nivel = () => {
+    const [distribuciones,setDistribuciones]=useState([]); //Variable para cargar las Distribuciones
+    const [Botellas, setBotellas] = useState([]); //Variable para cargar las Botellas
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8); // Número de items por página
@@ -33,18 +35,28 @@ const ListaBotella = () => {
     //Variables para guardar Botella
     const [descripcion,setDescripcion]=useState("");
     const [ubicacion,setUbicacion]=useState("");
-    const [tipo,setTipo]=useState("");
     const [distanciaOptica,setDistanciaOptica]=useState("");
     const [distanciaLineal,setDistanciaLineal]=useState("");
+    const [distribucion,setDistribucion]=useState("");
 
 
     const CargarDatos=()=>{
-        axios.get('https://localhost:7097/api/ControladorDatos/Botellas')
+        axios.get('https://localhost:7097/api/ControladorDatos/Botellas2Nivel')
             .then(response => {
                 const data = response.data;
                 setBotellas(data);
                 setTotalPages(Math.ceil(data.length / itemsPerPage));
                 setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Hubo un error al obtener las Botellas:', error);
+                setLoading(false);
+            });
+            axios.get('https://localhost:7097/api/ControladorDatos/Distribuciones')
+            .then(response => {
+                const data = response.data;
+                setDistribuciones(data);
                 setLoading(false);
             })
             .catch(error => {
@@ -55,9 +67,9 @@ const ListaBotella = () => {
     const LimpiarFormulario=()=>{
         setDescripcion("");
         setUbicacion("");
-        setTipo("");
         setDistanciaOptica("");
         setDistanciaLineal("");
+        setDistribucion("");
     }
 
     useEffect(() => {
@@ -86,7 +98,7 @@ const ListaBotella = () => {
 
     const BorrarSeleccionado = () => {
         if (BotBorrar===null) return;
-        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarBotella/${BotBorrar}`)
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarBotella2Nivel/${BotBorrar}`)
         .then(response=>{
             Swal.fire({
                 icon: 'success',
@@ -102,7 +114,7 @@ const ListaBotella = () => {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'Hubo un problema al eliminar la Botella.',
+                text: 'Hubo un problema al eliminar el Troncal.',
                 confirmButtonText: 'OK'
             });
             setShowModal(false)
@@ -115,12 +127,12 @@ const ListaBotella = () => {
     const handleGuardar =()=>{
         const botella ={
             descripcion,
-            tipo,
             distanciaLineal,
             distanciaOptica,
-            ubicacion
+            ubicacion,
+            distribucion
         }
-        if (!descripcion || !tipo || !distanciaLineal || !distanciaOptica || !ubicacion){
+        if (!descripcion || !distribucion || !distanciaLineal || !distanciaOptica || !ubicacion){
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -138,7 +150,7 @@ const ListaBotella = () => {
                     Swal.showLoading();
                 }
             });
-            axios.post("https://localhost:7097/api/ControladorDatos/CrearBotella",botella,{
+            axios.post("https://localhost:7097/api/ControladorDatos/CrearBotella2Nivel",botella,{
                 headers:{
                     'Content-Type':'application/json'
                 }
@@ -183,24 +195,24 @@ const ListaBotella = () => {
                                 <th>Id</th>
                                 <th>Descripcion</th>
                                 <th>Ubicación</th>
-                                <th>Tipo</th>
                                 <th>DistanciaOptica</th>
                                 <th>DistanciaLineal</th>
+                                <th>Distribucion</th>
                                 <th>Iconos</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedTr.length > 0 ? (
                                 paginatedTr.map(botella => (
-                                    <tr key={botella.idBotella}>
-                                        <td>{botella.idBotella}</td>
+                                    <tr key={botella.idBotella2Nivel}>
+                                        <td>{botella.idBotella2Nivel}</td>
                                         <td>{botella.descripcion}</td>
                                         <td>{botella.ubicacion}</td>
-                                        <td>{botella.tipo}</td>
                                         <td>{botella.distanciaOptica}</td>
                                         <td>{botella.distanciaLineal}</td>
+                                        <td>{botella.distribucion}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <i onClick={()=>BorrarClick(botella.idBotella)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={()=>BorrarClick(botella.idBotella2Nivel)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
                                             <i onClick={() => handleDetalles(botella)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
@@ -257,9 +269,9 @@ const ListaBotella = () => {
                 <Modal.Body>
                     <p>Descripción: {detalleBotella.descripcion}</p>
                     <p>Ubicación: {detalleBotella.ubicacion}</p>
-                    <p>Tipo de Botella: {detalleBotella.tipo}</p>
                     <p>Distancia Lineal: {detalleBotella.distanciaLineal}</p>
                     <p>Distancia Optica: {detalleBotella.distanciaOptica}</p>
+                    <p>Distribución: {detalleBotella.distribucion}</p>
                     {/* Mostrar mapa con ubicación */}
                     {detalleBotella.ubicacion && (
                         <MapContainer
@@ -287,7 +299,7 @@ const ListaBotella = () => {
            {/* Modal Formulario */}
            <Modal show={showFormulario} onHide={() => setShowFormulario(false)} centered size='lg'>
                 <Modal.Header closeButton>
-                    <Modal.Title>Cargar Botella</Modal.Title>
+                    <Modal.Title>Cargar Botella2Nivel</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
@@ -300,13 +312,15 @@ const ListaBotella = () => {
                             />
                         </Form.Group>
                         <Form.Group className='mb-3'>
-                            <Form.Label>Tipo de Botella</Form.Label>
-                            <Form.Select onChange={(e) => setTipo(e.target.value)}>
-                                <option>Seleccione un Tipo de Botella</option>
-                                <option>BOTELLA TRONCAL</option>
-                                <option>CEDO</option>
-                                <option>BOTELLA DE DISTRIBUCION</option>
-                            </Form.Select>
+                            <Form.Label>Distribución</Form.Label>
+                            <Select 
+                                value={distribuciones.find(option=>option.value===distribucion)}
+                                onChange={(selectedOption)=>setDistribucion(selectedOption.value)}
+                                options={distribuciones.map((item)=>({
+                                    value:item.idDistribucionSector,
+                                    label:item.descripcion
+                                }))}
+                            />
                         </Form.Group>
                         <Form.Group className='mb-3'>
                             <Form.Label>Distancia Lineal</Form.Label>
@@ -343,4 +357,4 @@ const ListaBotella = () => {
     )
 }
 
-export default ListaBotella;
+export default ListaBotella2Nivel;

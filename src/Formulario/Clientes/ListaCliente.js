@@ -1,36 +1,45 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Modal, Button, Pagination } from 'react-bootstrap';
-import * as XLSX from 'xlsx';  // Importa la biblioteca XLSX
+import { Modal,Button,Pagination,ModalTitle,Form } from 'react-bootstrap';
+import Select from 'react-select';
+import Swal from 'sweetalert2';
 
 const ListaCliente = () => {
-    const [Clientes, setClientes] = useState([]);
+    const [Clientes, setClientes] = useState([]); //Variable para cargar los Clientes
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8); // Número de items por página
     const [totalPages, setTotalPages] = useState(1);
     const [paginatedTr, setpaginatedTr] = useState([]);
-    const navigate = useNavigate();
-    const [ShowModal, setShowModal] = useState(false);
-    const [ShowDetalle, setShowDetalle] = useState(false);
-    const [CliSel,setCliSel] = useState("");
+    const [ShowModal, setShowModal] = useState(false);//Variable para el modal de Eliminar
+    const [ShowDetalle, setShowDetalle] = useState(false);//Variable para el modal de Detalle
+    const [detalleCliente,setDetalleCliente] = useState({})
+    const [showFormulario,setShowFormulario]=useState(false);//Variable para el modal de Formulario
     const [CliBorrar,setCliBorrar]=useState("");
 
-    useEffect(() => {
+    //Variables para cargar Clientes
+    const [idCliente, setIDCliente]=useState("");
+    const [nombre,setNombre]=useState("");
+    const [domicilio,setDomicilio]=useState("");
+    const [telefono,setTelefono]=useState("");
+    const [correo,setCorreo]=useState("");
+
+    const CargarDatos = ()=>{
         axios.get('https://localhost:7097/api/ControladorDatos/CargarClientes')
-            .then(response => {
-                const data = response.data;
-                setClientes(data);
-                setTotalPages(Math.ceil(data.length / itemsPerPage));
-                setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Hubo un error al obtener los Pelos de Fibra:', error);
-                setLoading(false);
-            });
+        .then(response => {
+            const data = response.data;
+            setClientes(data);
+            setTotalPages(Math.ceil(data.length / itemsPerPage));
+            setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Hubo un error al obtener los Clientes:', error);
+            setLoading(false);
+        });
+    }
+    useEffect(() => {
+        CargarDatos();
     }, [currentPage]);
 
     const handlePageChange = (pageNumber) => {
@@ -40,16 +49,19 @@ const ListaCliente = () => {
         setpaginatedTr(Clientes.slice(startIndex, endIndex));
     };
 
+    const LimpiarFormulario=()=>{
+        setIDCliente("");
+        setNombre("");
+        setDomicilio("");
+        setTelefono("");
+        setCorreo("");
+    }
     if (loading) {
         return (
             <div className="loader-container">
                 <div className="loader"></div>
             </div>
         );
-    }
-
-    const CargarCliente = () => {
-        navigate("/CrearCliente");
     }
 
     const BorrarClick = (ID) => {
@@ -61,26 +73,83 @@ const ListaCliente = () => {
         if (CliBorrar===null) return;
         axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarCliente/${CliBorrar}`)
         .then(response=>{
-            setClientes(Clientes.filter(cliente => cliente.idCliente !== CliBorrar));
-            setShowModal(false);
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'El cliente ha sido eliminado exitosamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    setShowModal(false)
+                    CargarDatos();
+                });
         })
         .catch(error=>{
-            console.error("Hubo un Error al eliminar el Cliente",error)
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al eliminar el Cliente.',
+                confirmButtonText: 'OK'
+            });
             setShowModal(false)
-        })
-    }
+        })}
 
-    const VerClick = (ID) => {
-        const clienteseleccionado = Clientes.find(clientes => clientes.idCliente === ID);
-        setCliSel(clienteseleccionado);
-        setShowDetalle(true);
+    const handleDetalles=(cliente)=>{
+        setDetalleCliente(cliente)
+        setShowDetalle(true)
     }
-
-    const DescargarPlanilla = () => {
-        const ws = XLSX.utils.json_to_sheet(Clientes);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Clientes');
-        XLSX.writeFile(wb, 'Clientes.xlsx');
+    const handleGuardar=()=>{
+        const cliente ={
+            idCliente,
+            nombre,
+            domicilio,
+            telefono,
+            correo
+        }
+        if (!idCliente || !nombre || !domicilio || !telefono || !correo){
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Todos los campos son requeridos.',
+                confirmButtonText: 'OK'
+            });
+            return; // Salir si hay campos faltantes
+        }
+        else{
+            Swal.fire({
+                title: 'Cargando...',
+                text: 'Guardando el Spliter...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            axios.post("https://localhost:7097/api/ControladorDatos/CrearCliente",cliente,{
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            })
+            .then(response =>{
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'El Cliente ha sido guardado correctamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    setShowFormulario(false);
+                    CargarDatos();
+                    LimpiarFormulario();
+                });
+            })
+            .catch(error =>{
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un problema al guardar el Cliente.',
+                    confirmButtonText: 'OK'
+                });
+            })
+        }
     }
 
     return (
@@ -88,8 +157,7 @@ const ListaCliente = () => {
             <div className="header">
                 <h1>Lista de Clientes</h1>
                 <div className='Btn-Header'>
-                    <button onClick={CargarCliente}>Cargar Cliente</button>
-                    <button onClick={DescargarPlanilla}>Descargar Plantilla</button>
+                    <Button className='primary' onClick={()=>setShowFormulario(true)}>Cargar Cliente</Button>
                 </div>
             </div>
             <div className="card" style={{ marginLeft: '5%', marginTop: '6%' }}>
@@ -115,9 +183,8 @@ const ListaCliente = () => {
                                         <td>{cliente.correo}</td>
                                         <td>{cliente.telefono}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <Link to={`/EditarBotella/${cliente.idCliente}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
                                             <i onClick={()=>BorrarClick(cliente.idCliente)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
-                                            <i onClick={() => VerClick(cliente.idCliente)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={() => handleDetalles(cliente)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
                                 ))
@@ -168,69 +235,78 @@ const ListaCliente = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* Modal de Observación */}
-            <Modal show={ShowDetalle} onHide={() => setShowDetalle(false)}>
+            {/* Modal para Detalles */}
+            <Modal show={ShowDetalle} onHide={() => setShowDetalle(false)} size='lg'>
                 <Modal.Header closeButton>
-                    <Modal.Title>Detalles</Modal.Title>
+                    <Modal.Title>Detalles del Troncal</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {CliSel ? (
-                        <>
-                            <div className="form-group">
-                                <label className="form-label">ID de Cliente</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={ CliSel.idCliente|| ''}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Nombre</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={CliSel.nombre || ''}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Domicilio</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={CliSel.domicilio || ''}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Telefono</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={CliSel.telefono || ''}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Correo</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={CliSel.correo || ''}
-                                    readOnly
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <p>No se encontraron detalles del cliente.</p>
-                    )}
+                    <p><strong>Id Cliente:</strong> {detalleCliente.idCliente}</p>
+                    <p><strong>Nombre:</strong> {detalleCliente.nombre}</p>
+                    <p><strong>Domicilio:</strong> {detalleCliente.domicilio}</p>
+                    <p><strong>Telefono:</strong> {detalleCliente.telefono}</p>
+                    <p><strong>Correo:</strong> {detalleCliente.correo}</p>
+
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" onClick={() => setShowDetalle(false)}>
-                        Volver
+                    <Button variant="secondary" onClick={() => setShowDetalle(false)}>
+                        Cerrar
                     </Button>
                 </Modal.Footer>
+            </Modal>
+                        {/* Modal para Formulario */}
+                        <Modal show={showFormulario} onHide={()=>setShowFormulario(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Cargar Cliente</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>ID Cliente</Form.Label>
+                                <Form.Control
+                                    type='number'
+                                    value={idCliente}
+                                    onChange={(e)=>setIDCliente(e.target.value)}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>Nombre de Cliente</Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    value={nombre}
+                                    onChange={(e)=>setNombre(e.target.value)}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>Domicilio</Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    value={domicilio}
+                                    onChange={(e)=>setDomicilio(e.target.value)}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>Telefono</Form.Label>
+                                <Form.Control
+                                    type='number'
+                                    value={telefono}
+                                    onChange={(e)=>setTelefono(e.target.value)}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>Correo</Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    value={correo}
+                                    onChange={(e)=>setCorreo(e.target.value)}
+                                />
+                        </Form.Group>
+                    </Form>
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={handleGuardar}>Guardar</Button>
+                        <Button variant="secondary" onClick={()=>setShowFormulario(false)}>Cancelar</Button>
+                    </Modal.Footer>
+                </Modal.Body>
             </Modal>
         </div>
     )

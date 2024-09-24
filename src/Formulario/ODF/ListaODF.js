@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import { Modal,Button,Pagination,ModalTitle,Form } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 
 const ListaODF = () => {
-    const [ODFs, setODFs] = useState([]);
+    const [ODFs, setODFs] = useState([]); //Variable para cargar los ODFs
     const [loading, setLoading] = useState(true);
-    const [ShowModal,setShowModal]=useState(false);
-    const [ShowDetalle,setShowDetalle]=useState(false);
+    const [ShowModal,setShowModal]=useState(false);//Variable para el modal de Eliminar
+    const [ShowDetalle,setShowDetalle]=useState(false);//Variable para el modal de Detalle
     const [ODFSel,setODFSel]=useState("");
     const [ODFBorrar,setODFBorrar]=useState("");
-    const [showFormulario,setShowFormulario]=useState(false);
+    const [showFormulario,setShowFormulario]=useState(false);//Variable para el modal de Formulario
     
-    //Variables para la carga de datos
+    //Variables para la carga de ODF
     const [nombreODF,setNombreODF] = useState("")
     const [puertosODF,setPuertosODF] = useState("")
     

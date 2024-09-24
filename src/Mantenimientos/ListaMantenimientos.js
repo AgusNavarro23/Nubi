@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import { Modal, Button, Pagination, ModalHeader, ModalTitle, Form } from 'react-bootstrap';
 import Select from 'react-select';
 import Swal from 'sweetalert2';
 
 const ListaMantenimientos = () => {
-    const [Mantenimientos, setMantenimientos] = useState([]);
+    const [Mantenimientos, setMantenimientos] = useState([]); //Varibale para guardar los Mantenimientos
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8);
     const [totalPages, setTotalPages] = useState(1);
     const [paginatedTr, setpaginatedTr] = useState([]);
     const [Show, setShow] = useState(false);
-    const [ShowDetalles, setShowDetalles] = useState(false);
+    const [ShowDetalles, setShowDetalles] = useState(false);//Variable para el modal de Detalle
     const [detallesMantenimiento, setDetallesMantenimiento] = useState({});
 
-    const [tipoElemento, setTipoElemento] = useState('');
+    const [tipoElemento, setTipoElemento] = useState('');//Se selecciona un tipo de elemento
     const [opcionesElemento, setOpcionesElemento] = useState([]);
     const [elementoSeleccionado, setElementoSeleccionado] = useState(null);
+
+    //Variables para crear Mantenimiento
     const [fechaMantenimiento, setFechaMantenimiento] = useState('');
     const [horaInicio, setHoraInicio] = useState('');
     const [horaFin, setHoraFin] = useState('');

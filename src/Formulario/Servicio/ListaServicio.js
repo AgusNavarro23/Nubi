@@ -1,35 +1,74 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { Modal, Button, Pagination } from 'react-bootstrap';
-import * as XLSX from 'xlsx';  // Importa la biblioteca XLSX
+import { Modal,Button,Pagination,ModalTitle,Form } from 'react-bootstrap';
+import Select from 'react-select';
+import Swal from 'sweetalert2';
 
 const ListaServicio = () => {
-    const [Servicios, setServicios] = useState([]);
+    const [Clientes,setClientes]=useState([]); //Variable para cargar los Clientes
+    const [NAPs,setNaps]=useState([]);//Variable para cargar las NAPs
+    const [Servicios, setServicios] = useState([]);//Variable para cargar los Servicios
     const [loading, setLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(8); // Número de items por página
     const [totalPages, setTotalPages] = useState(1);
     const [paginatedTr, setpaginatedTr] = useState([]);
-    const navigate = useNavigate();
-    const [ShowModal, setShowModal] = useState(false);
-    const [ShowDetalle, setShowDetalle] = useState(false);
-    const [SerSel,setSerSel] = useState("");
+    const [ShowModal, setShowModal] = useState(false);//Variable para el modal de Eliminar
+    const [ShowDetalle, setShowDetalle] = useState(false);//Variable para el modal de Detalle
+    const [detalleServicio,setDetalleServicio] = useState({})
+    const [showFormulario,setShowFormulario]=useState(false);//Variable para el modal de Formulario
+    const [SerBorrar,setSerBorrar] = useState("");
 
-    useEffect(() => {
+    //Variables para guardar Servicio
+    const [idServicio,setIDServicio]=useState("")
+    const [nombreServicio, setNombreServicio] = useState("");
+    const [cliente, setCliente] = useState("");
+    const [nap,setNAP ] = useState("");
+
+    const CargarDatos=()=>{
         axios.get('https://localhost:7097/api/ControladorDatos/CargarServicios')
-            .then(response => {
-                const data = response.data;
-                setServicios(data);
-                setTotalPages(Math.ceil(data.length / itemsPerPage));
-                setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
-                setLoading(false);
-            })
-            .catch(error => {
-                console.error('Hubo un error al obtener los Servicios:', error);
-                setLoading(false);
-            });
+        .then(response => {
+            const data = response.data;
+            setServicios(data);
+            setTotalPages(Math.ceil(data.length / itemsPerPage));
+            setpaginatedTr(data.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage));
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Hubo un error al obtener los Servicios:', error);
+            setLoading(false);
+        });
+        axios.get('https://localhost:7097/api/ControladorDatos/CargarClientes')
+        .then(response => {
+            const data = response.data;
+            setClientes(data);
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Hubo un error al obtener los Clientes:', error);
+            setLoading(false);
+        });
+        axios.get('https://localhost:7097/api/ControladorDatos/CargarNaps')
+        .then(response => {
+            const data = response.data;
+            setNaps(data);
+            setLoading(false);
+        })
+        .catch(error => {
+            console.error('Hubo un error al obtener las NAPs:', error);
+            setLoading(false);
+        });
+
+    }
+    const LimpiarFormulario=()=>{
+        setIDServicio("");
+        setNombreServicio("");
+        setCliente("");
+        setNAP("");
+    }
+    
+    useEffect(() => {
+        CargarDatos();
     }, [currentPage]);
 
     const handlePageChange = (pageNumber) => {
@@ -47,29 +86,84 @@ const ListaServicio = () => {
         );
     }
 
-    const CargarServicio = () => {
-        navigate("/CrearServicio");
-    }
-
-    const BorrarClick = () => {
+    const BorrarClick = (ID) => {
+        setSerBorrar(ID)
         setShowModal(true);
     }
 
     const BorrarSeleccionado = () => {
-        // Implementa la lógica para borrar el elemento seleccionado
-    }
+        if (SerBorrar===null) return;
+        axios.delete(`https://localhost:7097/api/ControladorDatos/BorrarServicio/${SerBorrar}`)
+        .then(response=>{
 
-    const VerClick = (ID) => {
-        const servicioencontrado = Servicios.find(servicio => servicio.idServicio === ID);
-        setSerSel(servicioencontrado);
-        setShowDetalle(true);
-    }
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'El Servicio ha sido eliminado exitosamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    setShowModal(false)
+                    CargarDatos();
+                });
+        })
+        .catch(error=>{
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Hubo un problema al eliminar el Servicio.',
+                confirmButtonText: 'OK'
+            });
+            setShowModal(false)
+        })}
 
-    const DescargarPlanilla = () => {
-        const ws = XLSX.utils.json_to_sheet(Servicios);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Servicios');
-        XLSX.writeFile(wb, 'Servicios.xlsx');
+    const handleDetalles =(servicio)=>{
+        setDetalleServicio(servicio)
+        setShowDetalle(true)
+    }
+    const handleGuardar=()=>{
+        const servicio ={
+            idServicio,
+            nombreServicio,
+            cliente:cliente,
+            nap:nap.value
+        }
+        console.log(servicio)
+        if (!idServicio || !nombreServicio || !cliente || !nap){
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Todos los campos son requeridos.',
+                confirmButtonText: 'OK'
+            });
+            return; // Salir si hay campos faltantes
+        }
+        else{
+            axios.post("https://localhost:7097/api/ControladorDatos/CrearServicio",servicio,{
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            })
+            .then(response =>{
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'El Servicio ha sido guardado correctamente.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    setShowFormulario(false);
+                    CargarDatos();
+                    LimpiarFormulario();
+                });
+            })
+            .catch(error =>{
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un problema al guardar el Servicio.',
+                    confirmButtonText: 'OK'
+                });
+            })
+        }
     }
 
     return (
@@ -77,8 +171,7 @@ const ListaServicio = () => {
             <div className="header">
                 <h1>Lista de Servicios</h1>
                 <div className='Btn-Header'>
-                    <button onClick={CargarServicio}>Cargar Servicio</button>
-                    <button onClick={DescargarPlanilla}>Descargar Plantilla</button>
+                    <Button className='primary' onClick={()=>setShowFormulario(true)}>Cargar Servicio</Button>
                 </div>
             </div>
             <div className="card" style={{ marginLeft: '5%', marginTop: '6%' }}>
@@ -104,9 +197,8 @@ const ListaServicio = () => {
                                         <td>{servicio.nap}</td>
                                         <td>{servicio.napDerivada}</td>
                                         <td style={{ padding: '10px' }}>
-                                            <Link to={`/EditarServicio/${servicio.idServicio}`}><i className="bi bi-pencil-square" style={{ padding: '5px', color: '#E58A92' }}></i></Link>
-                                            <i onClick={BorrarClick} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
-                                            <i onClick={() => VerClick(servicio.idServicio)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={()=>BorrarClick(servicio.idServicio)} className="bi bi-trash" style={{ padding: '5px', color: '#E58A92' }}></i>
+                                            <i onClick={() => handleDetalles(servicio)} className="bi bi-eye" style={{ padding: '5px', color: '#E58A92' }}></i>
                                         </td>
                                     </tr>
                                 ))
@@ -157,42 +249,75 @@ const ListaServicio = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* Modal de Observación */}
-            <Modal show={ShowDetalle} onHide={() => setShowDetalle(false)}>
+            {/* Modal para Detalles */}
+            <Modal show={ShowDetalle} onHide={() => setShowDetalle(false)} size='lg'>
                 <Modal.Header closeButton>
-                    <Modal.Title>Detalles</Modal.Title>
+                    <Modal.Title>Detalles del Servicio</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    {SerSel ? (
-                        <>
-                            <div className="form-group">
-                                <label className="form-label">ID de Servicio</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={SerSel.idServicio || ''}
-                                    readOnly
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label className="form-label">Descripcion</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={SerSel.nombreServicio || ''}
-                                    readOnly
-                                />
-                            </div>
-                        </>
-                    ) : (
-                        <p>No se encontraron detalles del Servicio.</p>
-                    )}
+                    <p><strong>Id:</strong> {detalleServicio.nombreServicio}</p>
+                    <p><strong>Cliente:</strong> {detalleServicio.descripcion}</p>
+                    <p><strong>NAP :</strong> {detalleServicio.nap}</p>
+                    <p><strong>NAP Derivada:</strong> {detalleServicio.napDerivada}</p>
+
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="info" onClick={() => setShowDetalle(false)}>
-                        Volver
+                    <Button variant="secondary" onClick={() => setShowDetalle(false)}>
+                        Cerrar
                     </Button>
                 </Modal.Footer>
+            </Modal>
+            {/* Modal para Formulario */}
+            <Modal show={showFormulario} onHide={()=>setShowFormulario(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Cargar Servicio</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>ID de Servicio</Form.Label>
+                                <Form.Control
+                                    type='number'
+                                    value={idServicio}
+                                    onChange={(e)=>setIDServicio(e.target.value)}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>Nombre de Servicio</Form.Label>
+                                <Form.Control
+                                    type='text'
+                                    value={nombreServicio}
+                                    onChange={(e)=>setNombreServicio(e.target.value)}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>NAP</Form.Label>
+                                <Select
+                                    value={NAPs.find(option => option.value === nap)} // Esto mantiene el valor seleccionado
+                                    onChange={(selectedOption) => setNAP(selectedOption)} // Obtén solo el valor
+                                    options={NAPs.map((item) => ({
+                                        value: item.codigoNap,
+                                        label: item.codigoNap
+                                    }))}
+                                />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                                <Form.Label>Cliente</Form.Label>
+                                <Select
+                                    value={Clientes.find(option => option.value === cliente)} // Esto mantiene el valor seleccionado
+                                    onChange={(selectedOption) => setCliente(selectedOption.value)} // Obtén solo el valor
+                                    options={Clientes.map((item) => ({
+                                        value: item.idCliente,
+                                        label: item.nombre
+                                    }))}
+                                />
+                        </Form.Group>
+                    </Form>
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={handleGuardar}>Guardar</Button>
+                        <Button variant="secondary" onClick={()=>setShowFormulario(false)}>Cancelar</Button>
+                    </Modal.Footer>
+                </Modal.Body>
             </Modal>
         </div>
     )
